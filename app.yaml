@@ -1,0 +1,30 @@
+version: "3.10"
+
+name: simple_api
+
+networks:
+  app_network:
+    name: app_network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.10.10.0/24
+
+volumes:
+  pgdata:
+    name: pgdata
+
+services:
+  pgdata:
+    image: postgres:11.3-alpine
+    ports:
+      - "5432:5432"
+    container_name: pgdata
+    restart: always
+    env_file:
+      - .env.prod
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app_network
