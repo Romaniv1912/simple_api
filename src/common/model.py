@@ -1,8 +1,9 @@
+from datetime import datetime
 from typing import Annotated
 
-from sqlalchemy import MetaData
+from sqlalchemy import DateTime, MetaData
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
 # Universal Mapped type primary key, needs to be added manually, refer to the following usage methods
 # MappedBase -> id: Mapped[id_key]
@@ -22,10 +23,25 @@ constraint_naming_conventions = {
 }
 
 
+class DateTimeMixin:
+    """Date and time Mixin data class"""
+
+    created_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now, sort_order=999, comment='creation time'
+    )
+    updated_time: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), onupdate=datetime.now, sort_order=999, comment='update time'
+    )
+
+
+class BaseModel(DateTimeMixin):
+    pass
+
+
 # Declarative base class, the original DeclarativeBase class,
 # exists as the parent class of all base or data model classes
 #
 # `DeclarativeBase <https://docs.sqlalchemy.org/en/20/orm/declarative_config.html>`__
 # `mapped_column() <https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column>`__
 metadata = MetaData(naming_convention=constraint_naming_conventions)
-Base = declarative_base(metadata=metadata)
+Base = declarative_base(cls=BaseModel, metadata=metadata)
