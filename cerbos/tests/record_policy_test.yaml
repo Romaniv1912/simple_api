@@ -1,0 +1,107 @@
+---
+name: RecordPolicyTest
+description: Tests for verifying the records resource policy
+
+principals:
+  # Admin role who has total access
+  admin:
+    id: admin
+    roles:
+      - admin
+
+  # Manager who supervise for user1
+  manager:
+    id: manager
+    roles:
+      - manager
+    attr:
+      users:
+        - user1
+
+  # User supervised by manager
+  user1:
+    id: user1
+    roles:
+      - user
+
+  # User without supervision
+  user2:
+    id: user2
+    roles:
+      - user
+
+resources:
+  # Record created by user1
+  record1:
+    kind: record
+    id: record1
+    attr:
+      user_id: user1
+
+  # Record created by user2
+  record2:
+    kind: record
+    id: record2
+    attr:
+      user_id: user2
+
+tests:
+  - name: Record read action
+    input:
+      principals:
+        - admin
+        - manager
+        - user1
+        - user2
+
+      resources:
+        - record1
+        - record2
+
+      actions:
+        - read
+
+    expected:
+      # Check admin
+      - principal: admin
+        resource: record1
+        actions:
+          read: EFFECT_ALLOW
+
+      - principal: admin
+        resource: record2
+        actions:
+          read: EFFECT_ALLOW
+
+      # Check manager
+      - principal: manager
+        resource: record1
+        actions:
+          read: EFFECT_ALLOW
+
+      - principal: manager
+        resource: record2
+        actions:
+          read: EFFECT_DENY
+
+      # Check user1
+      - principal: user1
+        resource: record1
+        actions:
+          read: EFFECT_ALLOW
+
+      - principal: user1
+        resource: record2
+        actions:
+          read: EFFECT_DENY
+
+      # Check user2
+      - principal: user2
+        resource: record1
+        actions:
+          read: EFFECT_DENY
+
+      - principal: user2
+        resource: record2
+        actions:
+          read: EFFECT_ALLOW

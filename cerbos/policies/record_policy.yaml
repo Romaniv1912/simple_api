@@ -1,0 +1,30 @@
+---
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: "default"
+  importDerivedRoles:
+    - store-roles
+  resource: record
+  rules:
+    # Any user can create a record
+    - actions: [ "create" ]
+      roles:
+        - user
+      effect: EFFECT_ALLOW
+
+    # A record can only be viewed by the user who created it or an admin.
+    - actions: [ "read" ]
+      derivedRoles:
+        - owner
+      roles:
+        - admin
+      effect: EFFECT_ALLOW
+
+    # A record can only be viewed by the manager who has particular user under supervision.
+    - actions: [ "read" ]
+      roles:
+        - manager
+      effect: EFFECT_ALLOW
+      condition:
+        match:
+          expr: R.attr.user_id in P.attr.users
