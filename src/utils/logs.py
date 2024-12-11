@@ -41,7 +41,7 @@ def setup_logging(settings: LogSettings):
     logging.root.handlers = [InterceptHandler()]
     logging.root.setLevel(settings.ROOT_LEVEL)
 
-    no_propagate = ('watchfiles.main',) # 'uvicorn.access')
+    no_propagate = ('watchfiles.main',)  # 'uvicorn.access')
 
     # Remove all log handlers and propagate to root logger
     for name in logging.root.manager.loggerDict.keys():

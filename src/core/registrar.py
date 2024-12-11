@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 from src.app.api.router import route
-from src.core.conf import settings, LOG_DIR
+from src.core.conf import LOG_DIR, settings
 from src.utils.health_check import ensure_unique_route_names
-from src.utils.logs import setup_logging, set_customize_logfile
+from src.utils.logs import set_customize_logfile, setup_logging
 from src.utils.openapi import simplify_operation_ids
 
 
