@@ -27,7 +27,6 @@ class AppSettings(BaseSettings):
     BASE_PATH: str
 
     PREFIX: str
-    SQLALCHEMY_ECHO: bool = False
 
 
 class DatabaseSettings(BaseSettings):
@@ -35,7 +34,7 @@ class DatabaseSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix='POSTGRES_')
 
-    SQLALCHEMY_ECHO: bool = False
+    ECHO: bool = False
     SCHEMA: str = 'postgresql+asyncpg'
     HOST: str = 'localhost'
     PORT: int = 5432
