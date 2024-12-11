@@ -28,3 +28,16 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app_network
+  cerbos:
+    build:
+      context: .
+      dockerfile: cerbos.dockerfile
+    command: [ "server", "--config=/cerbos_data/config.yaml" ]
+    image: cerbos:latest
+    ports:
+      - "3592:3592"
+    container_name: cerbos
+    env_file:
+      - .env.prod
+    networks:
+      - app_network
