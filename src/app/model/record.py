@@ -22,4 +22,4 @@ class Record(Base):
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey('users.id', ondelete='SET NULL'), default=None, comment='records user id'
     )
-    users: Mapped[list['User']] = relationship(back_populates='records', lazy=True)  # noqa: F821
+    user: Mapped['User'] = relationship(back_populates='records', lazy=True)  # noqa: F821
