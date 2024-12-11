@@ -18,5 +18,5 @@ class Role(Base):
 
     # Role user many-to-many
     users: Mapped[list['User']] = relationship(  # noqa: F821
-        secondary=user_role, back_populates='roles'
+        secondary=user_role, back_populates='roles', lazy=True
     )
