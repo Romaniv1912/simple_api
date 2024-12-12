@@ -20,6 +20,7 @@ dependencies = [
     "sqlalchemy-crud-plus>=1.6.0",
     "passlib>=1.7.4",
     "authx>=1.4.0",
+    "bcrypt>=4.2.1",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
