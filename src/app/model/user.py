@@ -15,7 +15,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
 
     __tablename__ = 'users'
 
-    id: Mapped[id_key]
+    id: Mapped[id_key] = mapped_column()
     uuid: Mapped[UUID] = mapped_column(postgresql.UUID, default=uuid4, unique=True)
     username: Mapped[str] = mapped_column(String(20), unique=True, index=True, comment='user name')
 
@@ -23,8 +23,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     supervisor_id: Mapped[int | None] = mapped_column(
         ForeignKey('users.id', ondelete='SET NULL'), default=None, comment='supervisor id'
     )
-    supervisor: Mapped[Union['User', None]] = relationship(back_populates='users')
-    users: Mapped[list['User']] = relationship(back_populates='supervisor')
+    supervisor: Mapped[Union['User', None]] = relationship('User', backref='users', remote_side=id)
 
     # User role many-to-many
     roles: Mapped[list['Role']] = relationship(  # noqa: F821
