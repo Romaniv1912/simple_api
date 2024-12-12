@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 
 from src.app.api.router import router
 from src.common.security import security
@@ -20,11 +21,10 @@ def register_app():
         root_path=settings.APP.BASE_PATH,
     )
 
-    register_exception(app)
-
     register_logger()
-
+    register_exception(app)
     register_router(app)
+    register_page(app)
 
     return app
 
@@ -56,5 +56,22 @@ def register_logger() -> None:
 
 
 def register_exception(app: FastAPI):
+    """
+    Register Exception
+
+    :param app:
+    :return:
+    """
+
     # Register AuthX exceptions
     security.handle_errors(app)
+
+
+def register_page(app: FastAPI):
+    """
+    Page query
+
+    :param app:
+    :return:
+    """
+    add_pagination(app)
