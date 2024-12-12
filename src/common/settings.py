@@ -18,6 +18,19 @@ class AppSettings(BaseSettings):
     PREFIX: str
 
 
+class CerbosSettings(BaseSettings):
+    """Database Settings"""
+
+    model_config = SettingsConfigDict(env_prefix='CERBOS_')
+
+    HTTP_HOST: str = 'localhost'
+    HTTP_PORT: int = 5432
+
+    @property
+    def http_url(self):
+        return f'http://{self.HTTP_HOST}:{self.HTTP_PORT}'
+
+
 class DatabaseSettings(BaseSettings):
     """Database Settings"""
 
