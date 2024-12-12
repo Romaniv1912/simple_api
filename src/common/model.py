@@ -2,8 +2,7 @@ from datetime import datetime
 from typing import Annotated
 
 from sqlalchemy import DateTime, MetaData
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column
 
 # Universal Mapped type primary key, needs to be added manually, refer to the following usage methods
 # MappedBase -> id: Mapped[id_key]
@@ -23,25 +22,44 @@ constraint_naming_conventions = {
 }
 
 
-class DateTimeMixin:
+class DateTimeMixin(MappedAsDataclass):
     """Date and time Mixin data class"""
 
     created_time: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now, sort_order=999, comment='creation time'
+        DateTime(timezone=True), init=False, default_factory=datetime.now, sort_order=999, comment='creation time'
     )
     updated_time: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), onupdate=datetime.now, sort_order=999, comment='update time'
+        DateTime(timezone=True), init=False, onupdate=datetime.now, sort_order=999, comment='update time'
     )
 
 
-class BaseModel(DateTimeMixin):
-    pass
+class MappedBase(DeclarativeBase):
+    """
+    Declarative base class, the original DeclarativeBase class,
+    exists as the parent class of all base or data model classes
+
+    `DeclarativeBase <https://docs.sqlalchemy.org/en/20/orm/declarative_config.html>`__
+    `mapped_column() <https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column>`__
+    """
+
+    metadata = MetaData(naming_convention=constraint_naming_conventions)
 
 
-# Declarative base class, the original DeclarativeBase class,
-# exists as the parent class of all base or data model classes
-#
-# `DeclarativeBase <https://docs.sqlalchemy.org/en/20/orm/declarative_config.html>`__
-# `mapped_column() <https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column>`__
-metadata = MetaData(naming_convention=constraint_naming_conventions)
-Base = declarative_base(cls=BaseModel, metadata=metadata)
+class DataClassBase(MappedAsDataclass, MappedBase):
+    """
+    Declarative data class base class, which will come with data class integration, allowing more advanced configuration,
+    but you must pay attention to some of its characteristics, especially when used with DeclarativeBase
+
+    `MappedAsDataclass <https://docs.sqlalchemy.org/en/20/orm/dataclasses.html#orm-declarative-native-dataclasses>`__
+    """  # noqa: E501
+
+    __abstract__ = True
+
+
+class Base(DataClassBase, DateTimeMixin):
+    """
+    Declarative Mixin data class base class, with data class integration, and contains MiXin data class basic table structure,
+    you can simply understand it as a data class base class containing basic table structure
+    """  # noqa: E501
+
+    __abstract__ = True

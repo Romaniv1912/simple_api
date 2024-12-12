@@ -12,19 +12,19 @@ class User(Base):
 
     __tablename__ = 'users'
 
-    id: Mapped[id_key] = mapped_column()
+    id: Mapped[id_key] = mapped_column(init=False)
     username: Mapped[str] = mapped_column(String(20), unique=True, index=True, comment='user name')
-    hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False, comment='password hash')
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, comment='enable status')
+    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment='superuser flag')
 
     # User supervisor one-to-many
     supervisor_id: Mapped[int | None] = mapped_column(
         ForeignKey('users.id', ondelete='SET NULL'), default=None, comment='supervisor id'
     )
-    supervisor: Mapped[Union['User', None]] = relationship('User', backref='users', remote_side=id)
+    users: Mapped[Union['User', None]] = relationship('User', init=False, backref='supervisor', remote_side=id)
 
     # User role many-to-many
     roles: Mapped[list['Role']] = relationship(  # noqa: F821
-        secondary=user_role, back_populates='users'
+        init=False, secondary=user_role, back_populates='users'
     )

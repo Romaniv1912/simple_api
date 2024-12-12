@@ -11,12 +11,12 @@ class Role(Base):
 
     __tablename__ = 'roles'
 
-    id: Mapped[id_key]
+    id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(20), unique=True, comment='role name')
     is_active: Mapped[bool] = mapped_column(default=True, comment='role activation status')
     remark: Mapped[str | None] = mapped_column(TEXT, default=None, comment='remark')
 
     # Role user many-to-many
     users: Mapped[list['User']] = relationship(  # noqa: F821
-        secondary=user_role, back_populates='roles', lazy=True
+        init=False, secondary=user_role, back_populates='roles', lazy=True
     )

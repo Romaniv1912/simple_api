@@ -11,14 +11,10 @@ class Record(Base):
 
     __tablename__ = 'records'
 
-    id: Mapped[id_key]
+    id: Mapped[id_key] = mapped_column(init=False)
     bot_token: Mapped[str] = mapped_column(String(255), comment='bot token')
     chat_id: Mapped[str] = mapped_column(String(255), comment='chat id')
     message: Mapped[str] = mapped_column(String, comment='message')
-    sent_time: Mapped[datetime | None] = mapped_column(DateTime, comment='sent time')
-    sent_response: Mapped[str] = mapped_column(String, comment='sent status')
-
-    # User records one-to-many
-    user_id: Mapped[int | None] = mapped_column(
-        ForeignKey('users.id', ondelete='SET NULL'), default=None, comment='records user id'
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='SET NULL'), comment='records user id')
+    sent_time: Mapped[datetime | None] = mapped_column(DateTime, default=None, comment='sent time')
+    sent_response: Mapped[str] = mapped_column(String, default='', comment='sent status')
