@@ -15,9 +15,14 @@ class CreateRecordParam(RecordSchemaBase):
     pass
 
 
+class CreateRecordExtendParam(CreateRecordParam):
+    user_id: int
+
+
 class GetRecordListDetails(RecordSchemaBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    user_id: int
     created_time: datetime
     updated_time: datetime | None = None
