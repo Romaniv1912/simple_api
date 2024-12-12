@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.common.model import Base, id_key
 
@@ -22,4 +22,3 @@ class Record(Base):
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey('users.id', ondelete='SET NULL'), default=None, comment='records user id'
     )
-    user: Mapped['User'] = relationship(back_populates='records', lazy=True)  # noqa: F821
