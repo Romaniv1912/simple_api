@@ -1,31 +1,33 @@
 import uuid
 
-from typing import Self
+from datetime import datetime
 
-from fastapi_users import schemas
-from pydantic import ConfigDict, model_validator
+from pydantic import ConfigDict, EmailStr, model_validator
 
 from src.app.schema.role import GetRoleListDetails
 from src.common.schema import SchemaBase
 
 
+class AuthLoginParam(SchemaBase):
+    username: str
+    password: str | None
+
+
 class UserSchemaBase(SchemaBase):
     username: str
     supervisor_id: int | None = None
+    is_active: bool | None = True
+    is_superuser: bool | None = False
 
 
-class CreateUserParam(schemas.BaseUserCreate, UserSchemaBase):
-    pass
-
-
-class UpdateUserParam(schemas.BaseUserUpdate, UserSchemaBase):
-    pass
-
-
-class GetUserInfoNoRelationDetails(schemas.BaseUser[int], UserSchemaBase):
+class GetUserInfoNoRelationDetails(UserSchemaBase):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
     uuid: uuid.UUID
+    email: EmailStr
+    created_time: datetime
+    updated_time: datetime | None = None
 
 
 class GetUserInfoListDetails(GetUserInfoNoRelationDetails):
@@ -42,7 +44,7 @@ class GetCurrentUserInfoDetail(GetUserInfoListDetails):
     roles: list[GetRoleListDetails] | list[str] | None = None
 
     @model_validator(mode='after')
-    def handel(self) -> Self:
+    def handel(self):
         """Work with teams and roles"""
 
         users = self.users

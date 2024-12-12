@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
-from src.app.api.ping import route as ping_route
+from src.app.api.auth import router as auth_router
+from src.app.api.ping import router as ping_router
 
-route = APIRouter()
+router = APIRouter()
 
-route.include_router(ping_route)
+router.include_router(ping_router)
+router.include_router(auth_router, prefix='/token', tags=['Authorization'])

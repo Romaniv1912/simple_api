@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
-from src.app.api.router import route
+from src.app.api.router import router
+from src.common.security import security
 from src.core.conf import LOG_DIR, settings
 from src.utils.health_check import ensure_unique_route_names
 from src.utils.logs import set_customize_logfile, setup_logging
@@ -19,10 +20,10 @@ def register_app():
         root_path=settings.APP.BASE_PATH,
     )
 
-    # journal
+    register_exception(app)
+
     register_logger()
 
-    # routing
     register_router(app)
 
     return app
@@ -37,7 +38,7 @@ def register_router(app: FastAPI):
     """
 
     # API
-    app.include_router(route)
+    app.include_router(router)
 
     # Extra
     ensure_unique_route_names(app)
@@ -52,3 +53,8 @@ def register_logger() -> None:
     """
     setup_logging(settings.LOG)
     set_customize_logfile(LOG_DIR, settings.LOG)
+
+
+def register_exception(app: FastAPI):
+    # Register AuthX exceptions
+    security.handle_errors(app)

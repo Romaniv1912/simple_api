@@ -8,7 +8,7 @@ from typing import Literal
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
-from src.common.settings import AppSettings, DatabaseSettings, LogSettings, TokenSettings
+from src.common.settings import AppSettings, DatabaseSettings, LogSettings
 
 # Get the project root directory
 # Or use an absolute path to the backend directory
@@ -28,7 +28,6 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal['dev', 'pro']
 
     APP: AppSettings = AppSettings()
-    TOKEN: TokenSettings = TokenSettings()
     DB: DatabaseSettings = DatabaseSettings()
     LOG: LogSettings = LogSettings()
 

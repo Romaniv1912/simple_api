@@ -2,9 +2,9 @@ from fastapi import APIRouter
 
 from src.app.schema.ping import GetPing
 
-route = APIRouter()
+router = APIRouter()
 
 
-@route.get('/ping', summary='Ping', description='Allow to ping service')
+@router.get('/ping', summary='Ping', description='Allow to ping service')
 def ping() -> GetPing:
     return GetPing()

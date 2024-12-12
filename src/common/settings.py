@@ -1,17 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class TokenSettings(BaseSettings):
-    """Token Settings"""
-
-    model_config = SettingsConfigDict(env_prefix='TOKEN_')
-
-    SECRET_KEY: str  # Key secrets.token_urlsafe(32)
-    ALGORITHM: str = 'HS256'  # algorithm
-    EXPIRE_SECONDS: int = 60 * 60 * 24 * 1  # expiration time unit seconds
-    PREFIX: str
-
-
 class AppSettings(BaseSettings):
     """App Settings"""
 
