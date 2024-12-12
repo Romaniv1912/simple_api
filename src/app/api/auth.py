@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from src.app.service.auth_service import GetLoginToken, GetNewToken, auth_service
+from src.app.service.auth import GetLoginToken, GetNewToken, auth_service
 
 router = APIRouter()
 

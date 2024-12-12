@@ -9,14 +9,15 @@ from src.app.crud.user import user_dao
 from src.app.schema.token import GetLoginToken, GetNewToken
 from src.app.schema.user import AuthLoginParam
 from src.common.security import security
-from src.database import CurrentSession
+from src.database import async_db_session
 from src.utils.password import password_verify
 
 
 class AuthService:
     @staticmethod
-    async def new_token(*, db: CurrentSession, obj: AuthLoginParam) -> GetLoginToken:
-        current_user = await user_dao.get_by_username(db, obj.username)
+    async def new_token(*, obj: AuthLoginParam) -> GetLoginToken:
+        async with async_db_session as db:
+            current_user = await user_dao.get_by_username(db, obj.username)
 
         if not current_user:
             raise HTTPException(404, 'Incorrect username or password')
