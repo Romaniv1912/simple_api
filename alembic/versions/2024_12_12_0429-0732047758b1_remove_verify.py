@@ -5,17 +5,18 @@ Revises: d43e1b8089ea
 Create Date: 2024-12-12 04:29:03.871562
 
 """
-from typing import Sequence, Union
 
-from alembic import op
+from typing import Sequence
+
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '0732047758b1'
-down_revision: Union[str, None] = 'd43e1b8089ea'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = 'd43e1b8089ea'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

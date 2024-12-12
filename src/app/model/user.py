@@ -1,8 +1,6 @@
 from typing import Union
-from uuid import UUID, uuid4
 
 from sqlalchemy import Boolean, ForeignKey, String
-from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.model.user_role import user_role
@@ -15,9 +13,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[id_key] = mapped_column()
-    uuid: Mapped[UUID] = mapped_column(postgresql.UUID, default=uuid4, unique=True)
     username: Mapped[str] = mapped_column(String(20), unique=True, index=True, comment='user name')
-    email: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

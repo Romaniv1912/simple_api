@@ -1,8 +1,6 @@
-import uuid
-
 from datetime import datetime
 
-from pydantic import ConfigDict, EmailStr, model_validator
+from pydantic import ConfigDict, model_validator
 
 from src.app.schema.role import GetRoleListDetails
 from src.common.schema import SchemaBase
@@ -24,8 +22,6 @@ class GetUserInfoNoRelationDetails(UserSchemaBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    uuid: uuid.UUID
-    email: EmailStr
     created_time: datetime
     updated_time: datetime | None = None
 
