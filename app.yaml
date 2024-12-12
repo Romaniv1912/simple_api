@@ -29,11 +29,10 @@ services:
     networks:
       - app_network
   cerbos:
-    build:
-      context: .
-      dockerfile: cerbos.dockerfile
+    image: ghcr.io/cerbos/cerbos:latest
     command: [ "server", "--config=/cerbos_data/config.yaml" ]
-    image: cerbos:latest
+    volumes:
+      - ./cerbos:/cerbos_data
     ports:
       - "3592:3592"
     container_name: cerbos
