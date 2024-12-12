@@ -1,16 +1,37 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi_pagination import add_pagination
 
 from src.app.api.router import router
 from src.common.security import security
 from src.core.conf import LOG_DIR, settings
+from src.database import create_table
 from src.utils.health_check import ensure_unique_route_names
 from src.utils.logs import set_customize_logfile, setup_logging
 from src.utils.openapi import simplify_operation_ids
 
 
+@asynccontextmanager
+async def register_init(app: FastAPI):
+    """
+    Start initialization
+
+    :return:
+    """
+
+    # Create database table
+    await create_table()
+
+    yield
+
+
 def register_app():
-    # FastAPI
+    """
+    Create FastAPI app
+
+    :return:
+    """
     app = FastAPI(
         title=settings.APP.TITLE,
         version=settings.APP.VERSION,
@@ -19,6 +40,7 @@ def register_app():
         redoc_url=settings.APP.REDOCS_URL,
         openapi_url=settings.APP.OPENAPI_URL,
         root_path=settings.APP.BASE_PATH,
+        lifespan=register_init,
     )
 
     register_logger()
