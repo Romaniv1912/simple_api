@@ -53,6 +53,8 @@ Testing is divided into two parts app tests and policy tests, respectively.
 
 ### App tests
 
+> Run only with your `.env` file
+
 To run API test use `ApiClientTest` 
 
 ### Policy tests
