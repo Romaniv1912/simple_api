@@ -3,6 +3,7 @@ import sys
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.common.model import Base
@@ -13,7 +14,7 @@ from src.utils.logs import log
 def create_engine_and_session(conf: DatabaseSettings):
     try:
         # Database engine
-        engine = create_async_engine(conf.url, echo=conf.ECHO, future=True, pool_pre_ping=True)
+        engine = create_async_engine(conf.url, echo=conf.ECHO, future=True, pool_pre_ping=True, poolclass=NullPool)
         # log.success('The database connection is successful')
     except Exception as e:
         log.error('❌ Database link failed {}', e)
