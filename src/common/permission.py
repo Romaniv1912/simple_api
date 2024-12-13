@@ -97,7 +97,7 @@ class Permission(BasePermission[TModel]):
         action: str = Depends(get_action),
         p: Principal = Depends(get_principal),
         c: AsyncCerbosClient = Depends(get_cerbos_client),
-    ):
+    ) -> None:
         pr = await self.get_resource()
 
         resp = await c.is_allowed(action, p, pr, correlation_id.get())

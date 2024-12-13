@@ -13,8 +13,9 @@ from src.app.schema.record import CreateRecordExtendParam
 class CRUDRecord(CRUDPlus[Record]):
     def get_list(self, plan: PlanResourcesResponse) -> Select:
         """
-        Get record select
+        Get record select by plan
 
+        :param plan:
         :return:
         """
         query = get_query(
@@ -28,9 +29,24 @@ class CRUDRecord(CRUDPlus[Record]):
         return query
 
     async def create(self, db: AsyncSession, obj: CreateRecordExtendParam) -> Record:
+        """
+        Create new record
+
+        :param db:
+        :param obj:
+        :return:
+        """
         return await self.create_model(db, obj)
 
     async def set_response(self, db: AsyncSession, pk: int, response: str):
+        """
+        Set response for record
+
+        :param db:
+        :param pk:
+        :param response:
+        :return:
+        """
         await self.update_model(db, pk, {'sent_response': response, 'sent_time': datetime.now()})
 
 
