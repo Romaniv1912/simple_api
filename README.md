@@ -1,6 +1,6 @@
 # Simple API
 
-Simple API is a test task. Main aim is developing a service using FastAPI and PostgreSQL that implements a basic role-based system, processes and stores incoming requests, and sends messages via Telegram.
+Simple API is a test task. The main aim is to develop a service using FastAPI and PostgreSQL that implements a basic role-based system, processes, and stores incoming requests, and sends messages via Telegram.
 
 Main Features:
 - Processing and storing JSON requests containing the following data: bottoken, chatid, message.
@@ -16,7 +16,7 @@ Main Features:
 
 ## Installation
 
-Use package manager what you prefer like **Poetry** or **PDM**, or use virtual environment
+Use the package manager what you prefer like **Poetry** or **PDM**, or use a virtual environment
 
 ```
 python -m venv venv
@@ -31,11 +31,11 @@ pip install -e .
 
 ## Usage
 
->Before run API you need to do a few steps:
+>Before running API you need to do a few steps:
 >- you need to create at least one `.env.prod` file, 
-  you can override this file with `.env` file to set dev environment
+  you can override this file with `.env` file to set the dev environment
 >- run docker-compose from `app.yaml` or you can set 
-  your relation by changing 
+  your relationship by changing 
 
 
 To run API use the command or run with IDE
@@ -43,13 +43,13 @@ To run API use the command or run with IDE
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-You can read documentation by `$APP_ROOT/redocs` or define your own path overwrites `APP_REDOCS_URL`. 
+You can read the documentation by `$APP_ROOT/redocs` or define your own path overwrites `APP_REDOCS_URL`. 
 If you want to test api manually, it's recommended to use **Postman** with import by path`$APP_ROOT/openapi`.
 
 
 ## Testing
 
-Testing divided into two parts app tests and policy test, respectively.  
+Testing is divided into two parts app tests and policy tests, respectively.  
 
 ### App tests
 
