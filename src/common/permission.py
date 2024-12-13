@@ -88,14 +88,15 @@ class Permission(Generic[TModel]):
     ) -> PlanResourcesResponse | TModel | None:
         action = self.get_action(request)
         cid = correlation_id.get()
-        pk = request.path_params.get(self.pk)
-        pr = await self.get_resource(int(pk) if pk else None)
-        resp = await c.is_allowed(action, p, pr, cid)
-
-        if not resp:
-            raise HTTPException(status_code=403, detail='Not Allowed')
 
         if not self.with_plan:
+            pk = request.path_params.get(self.pk)
+            pr = await self.get_resource(int(pk) if pk else None)
+            resp = await c.is_allowed(action, p, pr, cid)
+
+            if not resp:
+                raise HTTPException(status_code=403, detail='Not Allowed')
+
             return self.data
 
         pr = ResourceDesc(self.kind)
