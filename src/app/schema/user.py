@@ -36,6 +36,7 @@ class GetUserInfoListDetails(GetUserInfoNoRelationDetails):
 class GetCurrentUserInfoDetail(GetUserInfoListDetails):
     model_config = ConfigDict(from_attributes=True)
 
+    supervisor: GetUserInfoNoRelationDetails | None = None
     users: list[GetUserInfoNoRelationDetails] | list[int] | None = None
     roles: list[GetRoleListDetails] | list[str] | None = None
 

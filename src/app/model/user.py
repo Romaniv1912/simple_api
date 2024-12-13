@@ -22,7 +22,8 @@ class User(Base):
     supervisor_id: Mapped[int | None] = mapped_column(
         ForeignKey('users.id', ondelete='SET NULL'), default=None, comment='supervisor id'
     )
-    users: Mapped[Union['User', None]] = relationship('User', init=False, backref='supervisor', remote_side=id)
+    supervisor: Mapped[Union['User', None]] = relationship('User', init=False, back_populates='users', remote_side=id)
+    users: Mapped[list['User']] = relationship('User', init=False, back_populates='supervisor')
 
     # User role many-to-many
     roles: Mapped[list['Role']] = relationship(  # noqa: F821
