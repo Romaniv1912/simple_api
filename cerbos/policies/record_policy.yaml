@@ -12,10 +12,14 @@ resourcePolicy:
         - user
       effect: EFFECT_ALLOW
 
-    # A record can only be viewed by the user who created it or an admin.
+    # A record can only be viewed by the user who created it
     - actions: [ "read" ]
       derivedRoles:
         - owner
+      effect: EFFECT_ALLOW
+
+    # A record can only be viewed by admin
+    - actions: [ "read" ]
       roles:
         - admin
       effect: EFFECT_ALLOW
