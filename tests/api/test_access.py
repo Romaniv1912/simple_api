@@ -15,7 +15,28 @@ from tests.types import Users, Records
         (Users.USER1, Records.USER1, 200),
     ]
 )
-def test_single_access(username, record, expected, client: TestClient, headers):
+def test_single_record_access(username, record, expected, client: TestClient, headers):
     resp = client.get(f'/records/{record}', headers=headers[username])
 
     assert resp.status_code == expected, 'Access rule failed'
+
+
+@pytest.mark.parametrize(
+    'username,expected',
+    [
+        (Users.ADMIN, [Users.ADMIN_ID, Users.MANAGER_ID, Users.USER1_ID, Users.USER2_ID]),
+        (Users.MANAGER, [Users.MANAGER_ID, Users.USER2_ID]),
+        (Users.USER1, [Users.USER1_ID]),
+        (Users.USER2, [Users.USER2_ID]),
+    ]
+)
+def test_multiple_record_access(username, expected, client: TestClient, headers):
+    resp = client.get(f'/records', headers=headers[username])
+
+    assert resp.status_code == 200, 'Access forbidden'
+
+    items = resp.json()['items']
+
+    assert len(items) >= 1, 'Wrong number of records'
+
+    assert all(map(lambda x: int(x['user_id']) in expected, items)), 'Access rule failed'

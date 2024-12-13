@@ -2,9 +2,16 @@
 
 class Users:
     ADMIN = 'admin'
+    ADMIN_ID = 1
+
     MANAGER = 'manager'
+    MANAGER_ID = 2
+
     USER1 = 'user1'
+    USER1_ID = 3
+
     USER2 = 'user2'
+    USER2_ID = 4
 
     @staticmethod
     def all():
