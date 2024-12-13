@@ -46,7 +46,7 @@ class GetCurrentUserInfoDetail(GetUserInfoListDetails):
 
         users = self.users
         if users:
-            self.roles = [user.id for user in users]  # type: ignore
+            self.users = [user.id for user in users]  # type: ignore
 
         roles = self.roles
         if roles:
