@@ -16,7 +16,7 @@ from src.utils.password import password_verify
 class AuthService:
     @staticmethod
     async def new_token(*, obj: AuthLoginParam) -> GetLoginToken:
-        async with async_db_session as db:
+        async with async_db_session.begin() as db:
             current_user = await user_dao.get_by_username(db, obj.username)
 
         if not current_user:
