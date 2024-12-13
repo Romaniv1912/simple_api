@@ -30,7 +30,7 @@ class CRUDRecord(CRUDPlus[Record]):
     async def create(self, db: AsyncSession, obj: CreateRecordExtendParam) -> Record:
         return await self.create_model(db, obj)
 
-    async def update_sent(self, db: AsyncSession, pk: int, response: str):
+    async def set_response(self, db: AsyncSession, pk: int, response: str):
         await self.update_model(db, pk, {'sent_response': response, 'sent_time': datetime.now()})
 
 
