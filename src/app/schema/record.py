@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import ConfigDict
 
+from src.app.schema.user import GetUserInfoNoRelationDetails
 from src.common.schema import SchemaBase
 
 
@@ -26,3 +27,9 @@ class GetRecordListDetails(RecordSchemaBase):
     user_id: int
     created_time: datetime
     updated_time: datetime | None = None
+
+
+class GetRecordInfoDetails(GetRecordListDetails):
+    model_config = ConfigDict(from_attributes=True)
+
+    user: GetUserInfoNoRelationDetails

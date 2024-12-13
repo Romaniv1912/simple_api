@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from cerbos_sqlalchemy import get_query
-from sqlalchemy import Select, desc
+from sqlalchemy import Select, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from sqlalchemy_crud_plus import CRUDPlus
 
 from cerbos.sdk.model import PlanResourcesResponse
@@ -11,6 +12,15 @@ from src.app.schema.record import CreateRecordExtendParam
 
 
 class CRUDRecord(CRUDPlus[Record]):
+    async def get(self, db: AsyncSession, pk: int) -> Record:
+        return await self.select_model(db, pk)
+
+    async def get_with_relation(self, db: AsyncSession, pk: int) -> Record:
+        stmt = select(self.model).options(joinedload(self.model.user)).filter(self.model.id == pk)
+
+        record = await db.execute(stmt)
+        return record.scalars().first()
+
     def get_list(self, plan: PlanResourcesResponse) -> Select:
         """
         Get record select by plan

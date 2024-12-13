@@ -1,6 +1,4 @@
-import abc
-
-from typing import Callable, Generic, Type, TypeVar
+from typing import Awaitable, Callable, Dict, Generic, List, Type, TypeVar
 
 from asgi_correlation_id import correlation_id
 from fastapi import HTTPException, Request
@@ -13,17 +11,7 @@ from src.core.conf import settings
 from src.utils.user import get_current_user
 
 TModel = TypeVar('TModel')
-
-
-def get_action(request: Request):
-    action = {'GET': 'read', 'POST': 'create', 'PUST': 'update', 'PATCH': 'update', 'DELETE': 'delete'}.get(
-        request.method
-    )
-
-    if action is None:
-        raise HTTPException(403, 'Not Allowed Method')
-
-    return action
+ACTIONS_DICT = {'GET': 'read', 'POST': 'create', 'PUST': 'update', 'PATCH': 'update', 'DELETE': 'delete'}
 
 
 def get_principal(user: User = Depends(get_current_user)) -> Principal:
@@ -40,67 +28,78 @@ async def get_cerbos_client() -> AsyncCerbosClient:
         yield client
 
 
-class BasePermission(Generic[TModel]):
-    def __init__(self, model: Type[TModel]) -> None:
+class Permission(Generic[TModel]):
+    def __init__(
+        self,
+        model: Type[TModel],
+        *,
+        action: str | None = None,
+        getter: Callable[[int], Awaitable[TModel]] | None = None,
+        mapper: Callable[[TModel], Dict] | List[str] | None = None,
+        with_plan: bool = False,
+        pk: str = 'pk',
+    ) -> None:
         self.model = model
+        self.action = action
+        self.with_plan = with_plan
+        self.getter = getter
+        self.mapper = mapper
+        self.data = None
+        self.pk = pk
 
     @property
     def kind(self):
         return self.model.__name__.lower()
 
-    @abc.abstractmethod
-    async def __call__(
-        self,
-        action: str = Depends(get_action),
-        p: Principal = Depends(get_principal),
-        c: AsyncCerbosClient = Depends(get_cerbos_client),
-    ):
-        raise NotImplementedError()
+    def get_action(self, request: Request) -> str:
+        if self.action is not None:
+            return self.action
 
+        action = ACTIONS_DICT.get(request.method)
 
-class PlanPermission(BasePermission[TModel]):
-    def get_resource(self) -> ResourceDesc:
-        return ResourceDesc(self.kind)
+        if action is None:
+            raise HTTPException(403, 'Method Not Allowed')
 
-    async def __call__(
-        self,
-        action: str = Depends(get_action),
-        p: Principal = Depends(get_principal),
-        c: AsyncCerbosClient = Depends(get_cerbos_client),
-    ) -> PlanResourcesResponse:
-        pr = self.get_resource()
-
-        plan: PlanResourcesResponse = await c.plan_resources(action, p, pr, correlation_id.get())
-
-        return plan
-
-
-class Permission(BasePermission[TModel]):
-    def __init__(self, model: Type[TModel], get_model: Callable[[int], TModel] | None = None) -> None:
-        super().__init__(model)
-        self.get_model = get_model
+        return action
 
     async def get_resource(self, pk: int | None = None) -> Resource:
-        if not self.get_model:
+        if not self.getter:
             return Resource(id='new', kind=self.kind)
 
         if not pk:
-            raise HTTPException(status_code=400, detail='Primary key required')
+            raise HTTPException(status_code=400, detail='Primary key is required')
 
-        data: TModel = await self.get_model(pk)
-        return Resource(
-            data.id, kind=self.kind, attr={key: getattr(data, key) for key in TModel.__table__.columns.keys()}
-        )
+        self.data: TModel = await self.getter(pk)
+
+        if isinstance(self.mapper, Callable):
+            attr = self.mapper(self.data)
+        elif isinstance(self.mapper, List):
+            attr = {key: getattr(self.data, key) for key in self.mapper}
+        else:
+            attr = {key: getattr(self.data, key) for key in self.model.__table__.columns.keys()}
+
+        return Resource(str(self.data.id), kind=self.kind, attr=attr)
 
     async def __call__(
         self,
-        action: str = Depends(get_action),
+        request: Request,
         p: Principal = Depends(get_principal),
         c: AsyncCerbosClient = Depends(get_cerbos_client),
-    ) -> None:
-        pr = await self.get_resource()
-
-        resp = await c.is_allowed(action, p, pr, correlation_id.get())
+    ) -> PlanResourcesResponse | TModel | None:
+        action = self.get_action(request)
+        cid = correlation_id.get()
+        pk = request.path_params.get(self.pk)
+        pr = await self.get_resource(int(pk) if pk else None)
+        resp = await c.is_allowed(action, p, pr, cid)
 
         if not resp:
             raise HTTPException(status_code=403, detail='Not Allowed')
+
+        if not self.with_plan:
+            return self.data
+
+        pr = ResourceDesc(self.kind)
+
+        plan: PlanResourcesResponse = await c.plan_resources(self.get_action(request), p, pr, cid)
+
+        return plan

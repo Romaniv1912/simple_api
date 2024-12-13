@@ -13,6 +13,20 @@ from src.utils.user import get_current_user
 
 class RecordService:
     @staticmethod
+    async def get(pk: int) -> Record:
+        async with async_db_session.begin() as db:
+            record = await record_dao.get(db, pk)
+
+        return record
+
+    @staticmethod
+    async def get_with_relation(pk: int) -> Record:
+        async with async_db_session.begin() as db:
+            record = await record_dao.get_with_relation(db, pk)
+
+        return record
+
+    @staticmethod
     def get_select(plan: PlanResourcesResponse) -> Select:
         return record_dao.get_list(plan)
 
