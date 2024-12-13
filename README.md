@@ -53,7 +53,7 @@ Testing is divided into two parts app tests and policy tests, respectively.
 
 ### App tests
 
-> Run only with your `.env` file
+> Run only with your `.env`. Dataset is located by path `./sql`
 
 To run API test use `ApiClientTest` 
 
