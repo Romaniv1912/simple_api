@@ -46,10 +46,12 @@ class CRUDUser(CRUDPlus[User]):
         :param username:
         :return:
         """
-        stmt = (select(self.model)
-                .options(selectinload(self.model.users))
-                .options(selectinload(self.model.supervisor))
-                .options(selectinload(self.model.roles)))
+        stmt = (
+            select(self.model)
+            .options(selectinload(self.model.users))
+            .options(selectinload(self.model.supervisor))
+            .options(selectinload(self.model.roles))
+        )
         filters = []
         if user_id:
             filters.append(self.model.id == user_id)
