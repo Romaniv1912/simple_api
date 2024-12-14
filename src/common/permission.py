@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, Dict, Generic, List, Type, TypeVar
+from typing import Any, Awaitable, Callable, Dict, List, Type, TypeVar
 
 from asgi_correlation_id import correlation_id
 from fastapi import HTTPException, Request
@@ -15,6 +15,7 @@ ACTIONS_DICT = {'GET': 'read', 'POST': 'create', 'PUST': 'update', 'PATCH': 'upd
 
 
 def get_principal(user: User = Depends(get_current_user)) -> Principal:
+    """Get principal from current user"""
     attr = {'id': user.id}
 
     if user.users:
@@ -28,32 +29,10 @@ async def get_cerbos_client() -> AsyncCerbosClient:
         yield client
 
 
-class Permission(Generic[TModel]):
-    def __init__(
-        self,
-        model: Type[TModel],
-        *,
-        action: str | None = None,
-        getter: Callable[[int], Awaitable[TModel]] | None = None,
-        mapper: Callable[[TModel], Dict] | List[str] | None = None,
-        with_plan: bool = False,
-        pk: str = 'pk',
-    ) -> None:
-        self.model = model
-        self.action = action
-        self.with_plan = with_plan
-        self.getter = getter
-        self.mapper = mapper
-        self.data = None
-        self.pk = pk
-
-    @property
-    def kind(self):
-        return self.model.__name__.lower()
-
-    def get_action(self, request: Request) -> str:
-        if self.action is not None:
-            return self.action
+def get_action(act: str | None = None):
+    def func(request: Request) -> str:
+        if act:
+            return act
 
         action = ACTIONS_DICT.get(request.method)
 
@@ -62,45 +41,84 @@ class Permission(Generic[TModel]):
 
         return action
 
-    async def get_resource(self, pk: int | None = None) -> Resource:
-        if not self.getter:
-            return Resource(id='new', kind=self.kind)
+    return func
 
-        if not pk:
-            raise HTTPException(status_code=400, detail='Primary key is required')
 
-        self.data: TModel = await self.getter(pk)
+async def get_plan(
+    action: str, principal: Principal, resource: ResourceDesc, client: AsyncCerbosClient, cid: str | None = None
+) -> PlanResourcesResponse:
+    """Return plan from Cerbos"""
+    plan: PlanResourcesResponse = await client.plan_resources(action, principal, resource, cid)
 
-        if isinstance(self.mapper, Callable):
-            attr = self.mapper(self.data)
-        elif isinstance(self.mapper, List):
-            attr = {key: getattr(self.data, key) for key in self.mapper}
-        else:
-            attr = {key: getattr(self.data, key) for key in self.model.__table__.columns.keys()}
+    return plan
 
-        return Resource(str(self.data.id), kind=self.kind, attr=attr)
 
-    async def __call__(
-        self,
-        request: Request,
-        p: Principal = Depends(get_principal),
-        c: AsyncCerbosClient = Depends(get_cerbos_client),
+async def raise_not_allowed(
+    action: str, principal: Principal, resource: Resource, client: AsyncCerbosClient, cid: str | None = None
+) -> None:
+    """Raise exception if action is not allowed"""
+    resp = await client.is_allowed(action, principal, resource, cid)
+
+    if not resp:
+        raise HTTPException(status_code=403, detail='Not Allowed')
+
+
+async def get_resource(kind: str, data: TModel, mapper: Callable[[TModel], Dict] | List[str] | None = None) -> Resource:
+    """
+    Get resource for Cerbos allow request
+
+    :param kind: kind of resource
+    :param data: Instance of model
+    :param mapper: Custom mapper for model
+    :return:
+    """
+    if not data:
+        return Resource(id='new', kind=kind)
+
+    if isinstance(mapper, Callable):
+        attr = mapper(data)
+    elif isinstance(mapper, List):
+        attr = {key: getattr(data, key) for key in mapper}
+    else:
+        attr = {key: getattr(data, key) for key in data.__table__.columns.keys()}
+
+    return Resource(str(data.id), kind=kind, attr=attr)
+
+
+def Permission(
+    model: Type[TModel],
+    *,
+    action: str | None = None,
+    getter: Callable[[Any, ...], Awaitable[TModel]] | None = None,
+    mapper: Callable[[TModel], Dict] | List[str] | None = None,
+    with_plan: bool = False,
+) -> Callable:
+    """
+    Set permission guard for route
+
+    :param model: model to get access for
+    :param action: action, set default by <fastapi.Request.method>
+    :param getter: get model function, for creating resource
+    :param mapper: map model function, default get all columns
+    :param with_plan: whether to get plan
+    """
+    kind = model.__name__.lower()
+    model_getter = getter or (lambda: None)
+
+    async def call(
+        act: str = Depends(get_action(action)),
+        data: TModel = Depends(model_getter),
+        principal: Principal = Depends(get_principal),
+        client: AsyncCerbosClient = Depends(get_cerbos_client),
     ) -> PlanResourcesResponse | TModel | None:
-        action = self.get_action(request)
         cid = correlation_id.get()
 
-        if not self.with_plan:
-            pk = request.path_params.get(self.pk)
-            pr = await self.get_resource(int(pk) if pk else None)
-            resp = await c.is_allowed(action, p, pr, cid)
+        if with_plan:
+            return await get_plan(act, principal, ResourceDesc(kind), client, cid)
 
-            if not resp:
-                raise HTTPException(status_code=403, detail='Not Allowed')
+        resource = await get_resource(kind, data, mapper)
+        await raise_not_allowed(act, principal, resource, client, cid)
 
-            return self.data
+        return data
 
-        pr = ResourceDesc(self.kind)
-
-        plan: PlanResourcesResponse = await c.plan_resources(self.get_action(request), p, pr, cid)
-
-        return plan
+    return call
