@@ -17,6 +17,14 @@ class AppSettings(BaseSettings):
 
     PREFIX: str
 
+    # Trace ID
+    TRACE_ID_REQUEST_HEADER_KEY: str = 'X-Request-ID'
+
+    # CORS Setting
+    MIDDLEWARE_CORS: bool = True
+    CORS_ALLOWED_ORIGINS: tuple[str] = ('*',)
+    CORS_EXPOSE_HEADERS: tuple[str] = (TRACE_ID_REQUEST_HEADER_KEY,)
+
 
 class CerbosSettings(BaseSettings):
     """Database Settings"""
