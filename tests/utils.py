@@ -1,5 +1,6 @@
 from starlette.testclient import TestClient
 
+
 def get_token_headers(client: TestClient, username: str) -> dict[str, str]:
     response = client.post(
         '/token/new',

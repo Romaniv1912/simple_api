@@ -1,5 +1,3 @@
-
-
 class Users:
     ADMIN = 'admin'
     ADMIN_ID = 1
@@ -16,7 +14,6 @@ class Users:
     @staticmethod
     def all():
         return [Users.ADMIN, Users.MANAGER, Users.USER1, Users.USER2]
-
 
 
 class Records:

@@ -1,4 +1,4 @@
-from typing import Generator, Dict
+from typing import Dict, Generator
 
 import pytest
 
@@ -18,4 +18,4 @@ def client() -> Generator:
 
 @pytest.fixture(scope='module')
 def headers(client: TestClient) -> Dict[str, Dict[str, str]]:
-    return { user: get_token_headers(client, user) for user in Users.all()}
+    return {user: get_token_headers(client, user) for user in Users.all()}
