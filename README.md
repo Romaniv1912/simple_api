@@ -36,6 +36,7 @@ pip install -e .
   you can override this file with `.env` file to set the dev environment
 >- run docker-compose from `app.yaml` or you can set 
   your relationship by changing 
+>- run in your virtual environment `alembic upgrade head` to apply all migrations into DB
 
 
 To run API use the command or run with IDE
